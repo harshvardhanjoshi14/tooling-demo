@@ -1,0 +1,93 @@
+[tools]
+uv = "0.11.21"
+
+[settings]
+python.uv_venv_auto = "create|source"
+task.output = "keep-order"
+
+[env]
+_.python.venv = { path = ".venv" }
+
+[tasks.install-dependencies]
+description = "Install the project dependencies"
+run = "uv sync"
+
+[tasks.setup]
+description = "Install and validate the development environment"
+run = [
+    { task = "install-dependencies" },
+    { task = "validate-setup" },
+]
+
+[tasks.validate-setup]
+description = "Print diagnostics and validate the development setup"
+depends = [
+    "diagnose-mise",
+    "diagnose-uv",
+    "diagnose-python",
+    "diagnose-environment",
+    "diagnose-application",
+    "lint",
+    "run-tests",
+]
+run = 'echo "Setup validation passed."'
+
+[tasks.diagnose-mise]
+hide = true
+run = '''
+echo "== mise =="
+mise --version
+mise ls --current
+'''
+
+[tasks.diagnose-uv]
+hide = true
+run = '''
+echo "== uv =="
+uv --version
+'''
+
+[tasks.diagnose-python]
+hide = true
+run = '''
+echo "== Python =="
+python --version
+python -c 'import sys; print(f"executable: {sys.executable}")'
+uv run python --version
+uv run python -c 'import sys; print(f"executable: {sys.executable}")'
+'''
+
+[tasks.diagnose-environment]
+hide = true
+run = '''
+echo "== project environment =="
+uv pip check
+uv pip list
+'''
+
+[tasks.diagnose-application]
+hide = true
+run = '''
+echo "== application =="
+uv run tooling-demo info
+'''
+
+[tasks.start-server]
+description = "Run the API"
+run = "uv run tooling-demo serve"
+
+[tasks.start-dev-server]
+description = "Run the API with automatic reloads"
+run = "uv run tooling-demo serve --reload"
+
+[tasks.run-tests]
+description = "Run the test suite"
+run = "uv run pytest"
+
+[tasks.lint]
+description = "Check the codebase with Ruff"
+run = "uv run ruff check ."
+
+[tasks.format]
+description = "Format the codebase with Ruff"
+run = "uv run ruff format ."
