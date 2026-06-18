@@ -1,3 +1,5 @@
+min_version = "2026.6.10"
+
 [tools]
 uv = "0.11.21"
 
@@ -13,11 +15,8 @@ description = "Install the project dependencies"
 run = "uv sync"
 
 [tasks.setup]
-description = "Install and validate the development environment"
-run = [
-    { task = "install-dependencies" },
-    { task = "validate-setup" },
-]
+description = "Install the development environment"
+depends = ["install-dependencies"]
 
 [tasks.validate-setup]
 description = "Print diagnostics and validate the development setup"

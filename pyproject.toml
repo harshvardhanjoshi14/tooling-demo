@@ -15,8 +15,7 @@ tooling-demo = "tooling_demo.cli:cli"
 
 [dependency-groups]
 dev = [
-    # FastAPI's TestClient uses httpx2 to exercise the ASGI app in tests.
-    "httpx2==2.4.0",
+    "httpx2>=2.4.0",
     "pytest==9.1.0",
     "ruff==0.15.17",
 ]
