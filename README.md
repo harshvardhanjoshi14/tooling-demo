@@ -75,13 +75,15 @@ mise run start-dev-server
 project dependencies and Git hooks, while `validate-setup` checks the
 environment and produces a diagnostic report.
 
-The API is available at `http://127.0.0.1:8000`, with interactive documentation
-at `http://127.0.0.1:8000/docs`.
+The API is available at `http://127.0.0.1:8000`, with runtime diagnostics at
+`http://127.0.0.1:8000/runtime` and interactive documentation at
+`http://127.0.0.1:8000/docs`.
 
 Run the installed package's CLI directly through uv when needed:
 
 ```bash
 uv run tooling-demo info
+uv run tooling-demo runtime
 uv run tooling-demo serve --help
 ```
 
