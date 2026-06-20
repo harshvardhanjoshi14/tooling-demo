@@ -1,35 +1,56 @@
 min_version = "2026.6.10"
 
 [tools]
-uv = "0.11.21"
+prek = "0.3.9"
+uv = "0.11.22"
 
 [settings]
 python.uv_venv_auto = "create|source"
-task.output = "keep-order"
+task.output = "prefix"
 
 [env]
 _.python.venv = { path = ".venv" }
+
+# Environment setup
 
 [tasks.install-dependencies]
 description = "Install the project dependencies"
 run = "uv sync"
 
-[tasks.setup]
-description = "Install the development environment"
-depends = ["install-dependencies"]
+[tasks.install-git-hooks]
+description = "Install and prepare the repository Git hooks"
+run = "prek install --prepare-hooks"
 
-[tasks.validate-setup]
-description = "Print diagnostics and validate the development setup"
-depends = [
-    "diagnose-mise",
-    "diagnose-uv",
-    "diagnose-python",
-    "diagnose-environment",
-    "diagnose-application",
-    "lint",
-    "run-tests",
-]
-run = 'echo "Setup validation passed."'
+# Application
+
+[tasks.start-server]
+description = "Run the API"
+run = "uv run tooling-demo serve"
+
+[tasks.start-dev-server]
+description = "Run the API with automatic reloads"
+run = "uv run tooling-demo serve --reload"
+
+# Quality checks
+
+[tasks.run-tests]
+description = "Run the test suite"
+run = "uv run pytest"
+
+[tasks.pre-commit]
+description = "Run all pre-commit checks against the repository"
+run = "prek run --all-files"
+
+[tasks.validate-pre-commit-config]
+hide = true
+run = "prek validate-config .pre-commit-config.yaml"
+
+[tasks.validate-pre-commit]
+hide = true
+env = { SKIP = "no-commit-to-branch" }
+run = "prek run --all-files"
+
+# Diagnostics
 
 [tasks.diagnose-mise]
 hide = true
@@ -37,6 +58,28 @@ run = '''
 echo "== mise =="
 mise --version
 mise ls --current
+'''
+
+[tasks.diagnose-prek]
+hide = true
+run = '''
+echo "== prek =="
+prek --version
+prek list
+'''
+
+[tasks.diagnose-git-hooks]
+hide = true
+run = '''
+echo "== Git hooks =="
+for hook in pre-commit commit-msg; do
+  hook_path="$(git rev-parse --git-path "hooks/$hook")"
+  if [ ! -x "$hook_path" ]; then
+    echo "$hook is not installed at $hook_path"
+    exit 1
+  fi
+  echo "$hook: $hook_path"
+done
 '''
 
 [tasks.diagnose-uv]
@@ -71,22 +114,29 @@ echo "== application =="
 uv run tooling-demo info
 '''
 
-[tasks.start-server]
-description = "Run the API"
-run = "uv run tooling-demo serve"
+# Aggregate workflows
 
-[tasks.start-dev-server]
-description = "Run the API with automatic reloads"
-run = "uv run tooling-demo serve --reload"
+[tasks.setup]
+description = "Install the development environment"
+run = [
+  { tasks = ["install-dependencies", "install-git-hooks"] },
+  'echo "Development environment is ready."',
+]
 
-[tasks.run-tests]
-description = "Run the test suite"
-run = "uv run pytest"
-
-[tasks.lint]
-description = "Check the codebase with Ruff"
-run = "uv run ruff check ."
-
-[tasks.format]
-description = "Format the codebase with Ruff"
-run = "uv run ruff format ."
+[tasks.validate-setup]
+description = "Print diagnostics and validate the development setup"
+run = [
+  { tasks = [
+    "diagnose-mise",
+    "diagnose-prek",
+    "diagnose-git-hooks",
+    "diagnose-uv",
+    "diagnose-python",
+    "diagnose-environment",
+    "diagnose-application",
+    "validate-pre-commit-config",
+    "validate-pre-commit",
+    "run-tests",
+  ] },
+  'echo "Setup validation passed."',
+]

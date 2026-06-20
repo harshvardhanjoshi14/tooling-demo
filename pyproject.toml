@@ -1,3 +1,7 @@
+[build-system]
+build-backend = "uv_build"
+requires = [ "uv-build==0.11.21" ]
+
 [project]
 name = "tooling-demo"
 version = "0.1.0"
@@ -5,32 +9,48 @@ description = "A small FastAPI service for exploring modern Python tooling."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "click==8.4.1",
-    "fastapi==0.137.1",
-    "uvicorn==0.49.0",
+  "click==8.4.1",
+  "fastapi==0.137.1",
+  "uvicorn==0.49.0",
 ]
-
-[project.scripts]
-tooling-demo = "tooling_demo.cli:cli"
+scripts.tooling-demo = "tooling_demo.cli:cli"
 
 [dependency-groups]
 dev = [
-    "httpx2>=2.4.0",
-    "pytest==9.1.0",
-    "ruff==0.15.17",
+  "httpx2>=2.4.0",
+  "pytest==9.1.0",
+  "ruff==0.15.18",
+  "ty==0.0.40",
 ]
-
-[build-system]
-requires = ["uv_build==0.11.21"]
-build-backend = "uv_build"
-
-[tool.pytest.ini_options]
-addopts = "--strict-config --strict-markers"
-testpaths = ["tests"]
 
 [tool.ruff]
 target-version = "py312"
 line-length = 88
+lint.select = [
+  "A",   # flake8-builtins
+  "ANN", # flake8-annotations
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "D",   # pydocstyle
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "I",   # isort
+  "RUF", # ruff
+  "S",   # flake8-bandit
+  "SIM", # flake8-simplify
+  "T10", # flake8-debugger
+  "W",
+  "YTT", # flake8-2020
+]
+lint.ignore = [
+  # LineTooLong
+  "E501",
+  # DoNotAssignLambda
+  "E731",
+]
+lint.per-file-ignores."tests/**/*.py" = [ "D", "S101" ]
+lint.pydocstyle.convention = "google"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+[tool.pytest]
+ini_options.testpaths = [ "tests" ]
+ini_options.addopts = "--strict-config --strict-markers"

@@ -11,12 +11,15 @@ carried into a project template.
 - a pinned Python 3.12 `src/` package
 - a reusable library with [FastAPI](https://fastapi.tiangolo.com/) and
   [Click](https://click.palletsprojects.com/) interfaces
-- [mise](https://mise.jdx.dev/) for installing uv, activating the environment,
-  and running project tasks
+- [mise](https://mise.jdx.dev/) for installing uv and
+  [prek](https://prek.j178.dev/), activating the environment, and running
+  project tasks
 - [uv](https://docs.astral.sh/uv/) for runtime and development dependency
   management
-- [pytest](https://docs.pytest.org/) and [Ruff](https://docs.astral.sh/ruff/) as
-  development dependencies
+- [pytest](https://docs.pytest.org/), [Ruff](https://docs.astral.sh/ruff/), and
+  [ty](https://docs.astral.sh/ty/) as development dependencies
+- a familiar [pre-commit](https://pre-commit.com/) configuration executed by
+  prek for formatting, linting, repository hygiene, and commit-message checks
 
 ## Install mise
 
@@ -69,8 +72,8 @@ mise run start-dev-server
 ```
 
 `mise install` installs the tools declared in `mise.toml`. `setup` installs the
-project dependencies, while `validate-setup` checks the environment and produces
-a diagnostic report.
+project dependencies and Git hooks, while `validate-setup` checks the
+environment and produces a diagnostic report.
 
 The API is available at `http://127.0.0.1:8000`, with interactive documentation
 at `http://127.0.0.1:8000/docs`.
@@ -107,25 +110,40 @@ for the current command list and descriptions.
 
 | Command | Purpose |
 | --- | --- |
-| `mise run setup` | Install the project dependencies. |
+| `mise run setup` | Install dependencies and prepare the Git hooks. |
 | `mise run install-dependencies` | Synchronize the uv project environment. |
-| `mise run validate-setup` | Rerun diagnostics, linting, and tests. |
+| `mise run install-git-hooks` | Install and prepare the prek-managed Git hooks. |
+| `mise run validate-setup` | Rerun diagnostics, pre-commit checks, and tests. |
 | `mise run start-dev-server` | Start the API with automatic reloads. |
 | `mise run start-server` | Start the API without automatic reloads. |
-| `mise run lint` | Check the codebase with Ruff. |
-| `mise run format` | Format the codebase with Ruff. |
+| `mise run pre-commit` | Run every pre-commit check against the repository. |
 | `mise run run-tests` | Run the pytest test suite. |
 
-These tasks are intentionally explicit. Developers can run the smallest useful
-check while working, and `validate-setup` provides the complete safety net. A
-later iteration will use [prek](https://prek.j178.dev/) to automate the relevant
-checks before a commit without removing the underlying commands.
+The pre-commit task is the repository's formatting and static-analysis entry
+point, while `validate-setup` adds diagnostics and tests as the complete safety
+net. `mise run pre-commit` intentionally fails on `main`; `validate-setup`
+skips only that branch guard so diagnostics can run from any branch. Run an
+individual hook through prek when narrower feedback is useful:
+
+```bash
+prek run ruff-check --all-files
+prek run ruff-format --all-files
+prek run ty-check --all-files
+prek run uv-lock --all-files
+```
+
+The configured `pre-commit` and `commit-msg` Git hooks run the relevant checks
+automatically during normal development. See the
+[contribution guide](CONTRIBUTING.md) for the human-facing Python style and
+commit conventions behind those checks.
 
 ## Current focus
 
-The first article will introduce the setup problem and dive into `mise`.
+The first article introduces the setup problem and dives into `mise`. The second
+adds prek-based formatting, linting, repository hygiene, and commit-message
+validation.
 
 Later articles will extend this repo with:
 
-- [prek](https://prek.j178.dev/)-based commit checks
 - CI that mirrors the local command surface
+- changelog generation from Conventional Commits
