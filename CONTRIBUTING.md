@@ -16,19 +16,15 @@ mise run validate-setup
 
 ## Python style
 
-- Target Python 3.12 and use modern Python syntax where it improves clarity.
+- Target Python 3.12.
 - Keep importable code under `src/tooling_demo/` and tests under `tests/`.
-- Prefer small functions with explicit inputs, focused responsibilities, and
-  meaningful return values.
-- Add type annotations to functions. Avoid `Any` and suppression comments unless
-  the boundary genuinely cannot be expressed more precisely.
+- Add type annotations to functions and verify them with
+  [ty](https://docs.astral.sh/ty/).
 - Write Google-style docstrings for public modules, classes, and functions.
-- Document `Args`, `Returns`, and `Raises` when they add information beyond the
-  signature. Explain the contract rather than restating the implementation.
-- Let [Ruff](https://docs.astral.sh/ruff/) own formatting, import ordering, and
-  linting rather than applying personal formatting preferences.
-- Use [ty](https://docs.astral.sh/ty/) to verify that annotations agree with how
-  values move through the program.
+- Add `Args`, `Returns`, and `Raises` sections when the public contract needs
+  them; do not repeat information already clear from the signature.
+- Use [Ruff](https://docs.astral.sh/ruff/) for formatting, import ordering, and
+  linting.
 
 The authoritative Ruff and ty policies live in `pyproject.toml`. Run the
 complete set of formatters and static checks with:
@@ -51,14 +47,12 @@ instead of bypassing the hook.
 ## Tests
 
 - Test observable behavior rather than implementation details.
-- Structure each test as Given, When, Then, using whitespace to keep those phases
-  visible. Add phase comments only when the boundaries are not obvious.
+- Separate Given, When, and Then phases with whitespace. Add phase comments only
+  when the boundaries are not obvious.
 - Give tests behavior-focused names such as `test_returns_service_metadata`.
-- Group tests in a class only when the class communicates a useful shared
-  behavior or context.
+- Use test classes only when they provide useful grouping or shared context.
 - Keep tests typed, but do not require docstrings that merely repeat test names.
-- Add a regression test with every bug fix and cover both success and failure
-  paths when introducing behavior.
+- Add regression coverage for bug fixes and tests for newly introduced behavior.
 
 ## Commit messages
 
@@ -79,9 +73,8 @@ docs: explain the local quality checks
 [Commitizen](https://commitizen-tools.github.io/commitizen/) validates this
 format through the `commit-msg` Git hook installed by `mise run setup`.
 
-Work on a focused branch rather than committing directly to `main`. Keep commits
-small enough that each one describes a coherent change and can be reviewed on
-its own.
+Work on a branch rather than committing directly to `main`. Keep each commit
+focused on one coherent change.
 
 ## Before opening a pull request
 
